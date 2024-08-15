@@ -4,6 +4,9 @@ const TaskSchema = new mongoose.Schema({
     title: {
         type: String
     },
+    content: {
+        type: String
+    },
     startTime: {
         type: Date
     },
@@ -15,9 +18,7 @@ const TaskSchema = new mongoose.Schema({
         type: String,
         default: 'pending'
     },
-    reminderPeriod: {
-        type: Date
-    },
+
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'

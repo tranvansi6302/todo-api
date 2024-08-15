@@ -2,9 +2,15 @@ const TaskModels = require('../models/Task.models')
 
 const createTask = async (req, res) => {
     try {
-        const { title } = req.body
+        const { title, content, endTime } = req.body
+        const { user } = req
+
         const task = await TaskModels.create({
-            title
+            title,
+            content,
+            endTime,
+            startTime: new Date(),
+            userId: user.id
         })
         res.json({
             message: 'Create task success',
@@ -27,9 +33,25 @@ const getTask = async (req, res) => {
         return res.status(500).json({ message: error.message })
     }
 }
+
+const getAllTask = async (req, res) => {
+    try {
+        const tasks = await TaskModels.find()
+        res.json({
+            message: 'Get tasks success',
+            data: tasks
+        })
+    } catch (error) {
+        return res.status(500).json({ message: error.message })
+    }
+}
+
 const getMyTask = async (req, res) => {
     try {
-        const tasks = await TaskModels.find({})
+        const { user } = req
+        const tasks = await TaskModels.find({
+            userId: user.id
+        })
         res.json({
             message: 'Get tasks success',
             data: tasks
@@ -42,13 +64,24 @@ const getMyTask = async (req, res) => {
 const updateTask = async (req, res) => {
     try {
         const { taskId } = req.params
-        const { title, startTime, endTime, reminderPeriod } = req.body
+        const { title, content, endTime } = req.body
+        const { user } = req
+
+        const findByUser = await TaskModels.findOne({
+            _id: taskId,
+            userId: user.id
+        })
+        if (!findByUser) {
+            return res.status(404).json({
+                message: 'Task not found'
+            })
+        }
+
         const task = await TaskModels.findByIdAndUpdate(taskId, {
             $set: {
                 title,
-                startTime,
-                endTime,
-                reminderPeriod
+                content,
+                endTime
             }
         })
         return res.json({
@@ -62,7 +95,20 @@ const updateTask = async (req, res) => {
 
 const deleteTask = async (req, res) => {
     try {
+        const { user } = req
         const { taskId } = req.params
+
+        const findByUser = await TaskModels.findOne({
+            _id: taskId,
+            userId: user.id
+        })
+
+        if (!findByUser) {
+            return res.status(404).json({
+                message: 'Task not found'
+            })
+        }
+
         const task = await TaskModels.findByIdAndDelete(taskId)
         if (!task) {
             return res.status(404).json({
@@ -81,6 +127,7 @@ const deleteTask = async (req, res) => {
 module.exports = {
     createTask,
     getTask,
+    getAllTask,
     getMyTask,
     updateTask,
     deleteTask

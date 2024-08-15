@@ -1,12 +1,20 @@
 const { Router } = require('express')
-const { createTask, getTask, updateTask, deleteTask, getMyTask } = require('../controllers/tasks.controllers')
+const {
+    createTask,
+    getTask,
+    updateTask,
+    deleteTask,
+    getMyTask,
+    getAllTask
+} = require('../controllers/tasks.controllers')
 const jwtAuthMiddleware = require('../middlewares/users.middlewares')
 
 const tasksRouter = Router()
-tasksRouter.post('/create', createTask)
+tasksRouter.post('/', jwtAuthMiddleware, createTask)
 tasksRouter.get('/:taskId', getTask)
-tasksRouter.get('/', getMyTask)
-tasksRouter.put('/:taskId', updateTask)
-tasksRouter.delete('/:taskId', deleteTask)
+tasksRouter.get('/', getAllTask)
+tasksRouter.get('/users/me', jwtAuthMiddleware, getMyTask)
+tasksRouter.put('/:taskId', jwtAuthMiddleware, updateTask)
+tasksRouter.delete('/:taskId', jwtAuthMiddleware, deleteTask)
 
 module.exports = tasksRouter
